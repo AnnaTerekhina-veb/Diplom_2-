@@ -1,6 +1,7 @@
 package StellarBurgersAPI;
 
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Test;
 
 
@@ -8,6 +9,16 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 public class OrderCreationTest {
+
+    private String authToken;
+    private void deleteUser(String token) {
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete("https://stellarburgers.nomoreparties.site/api/auth/user")
+                .then()
+                .statusCode(202);
+    }
 
     @Test
     public void createOrderWithRegisteredUser() {
@@ -20,8 +31,7 @@ public class OrderCreationTest {
 
         String accessToken = tokens.accessToken;
 
-
-        Response ingredientsResponse = given()
+                Response ingredientsResponse = given()
                 .header("Authorization", accessToken)
                 .when()
                 .get("https://stellarburgers.nomoreparties.site/api/ingredients")
@@ -113,5 +123,11 @@ public class OrderCreationTest {
                 .statusCode(500);
     }
 
-
+    @After
+    public void cleanup() {
+        if (authToken != null) {
+            deleteUser(authToken);
+            authToken = null;
+        }
+    }
 }

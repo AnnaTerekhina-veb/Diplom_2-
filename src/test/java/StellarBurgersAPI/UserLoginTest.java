@@ -1,5 +1,6 @@
 package StellarBurgersAPI;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -25,6 +26,15 @@ public class UserLoginTest {
     private String createUserAndGetToken() {
         UserCreation user = userCreationHelper.generateUniqueUser();
         return registerAndGetToken(user);
+    }
+    private String authToken;
+    private void deleteUser(String token) {
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete("https://stellarburgers.nomoreparties.site/api/auth/user")
+                .then()
+                .statusCode(202);
     }
 
     @Test
@@ -97,5 +107,12 @@ public class UserLoginTest {
                 .statusCode(401)
                 .body("success", equalTo(false))
                 .body("message", equalTo("You should be authorised"));
+    }
+    @After
+    public void cleanup() {
+        if (authToken != null) {
+            deleteUser(authToken);
+            authToken = null;
+        }
     }
 }

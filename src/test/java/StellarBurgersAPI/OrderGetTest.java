@@ -1,5 +1,6 @@
 package StellarBurgersAPI;
 
+import org.junit.After;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
@@ -9,6 +10,16 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 
 public class OrderGetTest {
+
+    private String authToken;
+    private void deleteUser(String token) {
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .delete("https://stellarburgers.nomoreparties.site/api/auth/user")
+                .then()
+                .statusCode(202);
+    }
 
     @Test
     public void getUserOrdersWithAuthorizationShouldReturnOrders() {
@@ -45,5 +56,13 @@ public class OrderGetTest {
                 .statusCode(401)
                 .body("success", equalTo(false))
                 .body("message", containsString("You should be authorised"));
+    }
+
+    @After
+    public void cleanup() {
+        if (authToken != null) {
+            deleteUser(authToken);
+            authToken = null;
+        }
     }
 }
